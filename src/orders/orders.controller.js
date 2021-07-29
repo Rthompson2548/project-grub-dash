@@ -11,7 +11,7 @@ const nextId = require("../utils/nextId")
 // MIDDLEWARE
 
 // middleware for checking if there is a delivery location for order
-function bodyHasDeliverProperty(req, res, next) {
+function bodyHasDeliverProp(req, res, next) {
   const { data: { deliverTo } = {} } = req.body
   // if there is a delivery location in the data, move onto the next function
   if (deliverTo) {
@@ -26,7 +26,7 @@ function bodyHasDeliverProperty(req, res, next) {
 
 
 // middleware for checking if there is a phone number associated with the order
-function bodyHasMobileProperty(req, res, next) {
+function bodyHasMobileNumber(req, res, next) {
   const { data: { mobileNumber } = {} } = req.body
   // if there is a phone number associated with the order, move onto next function
   if (mobileNumber) {
@@ -41,7 +41,7 @@ function bodyHasMobileProperty(req, res, next) {
 
 
 // middleware for checking if the order has a status
-function bodyHasStatusProperty(req, res, next) {
+function bodyHasStatus(req, res, next) {
   const { data: { status } = {} } = req.body
   // if the dish has a delivery status, move onto next function
   if (status) {
@@ -56,7 +56,7 @@ function bodyHasStatusProperty(req, res, next) {
 
 
 // middleware for checking if the status is in the correct format
-function statusHasValidString(req, res, next) {
+function dataStringIsValid(req, res, next) {
   const { data: { status } = {} } = req.body
   // if the dish delivery status is one of the following valid statuses, move onto next function
   if (status.includes("pending") || status.includes("preparing") || status.includes("out-for-delivery") || status.includes("delivered")) {
@@ -71,7 +71,7 @@ function statusHasValidString(req, res, next) {
 
 
 // middleware for checking if there is a dish(s) in the order
-function bodyHasDishesProperty(req, res, next) {
+function bodyHasDishesProp(req, res, next) {
   const { data: { dishes } = {} } = req.body
   // if the order contain 1 or more dishes, move onto the next function
   if (dishes) {
@@ -86,7 +86,7 @@ function bodyHasDishesProperty(req, res, next) {
 
 
 // middleware for checking if there is a valid number of dishes in the order
-function dishesIsValidArray(req, res, next) {
+function dishesArrayIsValid(req, res, next) {
   const { data: { dishes } = {} } = req.body
   // if there are no dishes, return the following message
   if (!Array.isArray(dishes) || dishes.length == 0) {
@@ -101,7 +101,7 @@ function dishesIsValidArray(req, res, next) {
 
 
 // middleware for checking if there is a valid quantity of a given dish
-function dishesArrayHasValidQuantity(req, res, next) {
+function dishesArrayLengthIsValid(req, res, next) {
   const { data: { dishes } = {} } = req.body
   // go through every dish in the order
   dishes.forEach((dish) => {
@@ -140,9 +140,9 @@ function dataIdMatchesOrderId(req, res, next) {
 function orderExists(req, res, next) {
   const orderId = req.params.orderId
   // find the correct order from all orders
-  const foundOrder = orders.find((order) => order.id === orderId)
+  const matchingOrder = orders.find((order) => order.id === orderId)
   // if it exists, move onto the next function
-  if(foundOrder) {
+  if(matchingOrder) {
     return next()
   }
   // otherwise, return the following message
@@ -153,8 +153,6 @@ function orderExists(req, res, next) {
 }
 
 
-
-
 // ROUTE HANDLERS
 
 // handler for listing the all of the orders
@@ -163,11 +161,24 @@ function list(req, res) {
 }
 
 
+// handler for updating an order
+function update(req, res) {
+  const orderId = req.params.orderId
+  const matchingOrder = orders.find((order) => order.id === orderId)
+  const { data: { deliverTo, mobileNumber, status, dishes } = {} } = req.body
+  matchingOrder.deliverTo = deliverTo
+  matchingOrder.mobileNumber = mobileNumber
+  matchingOrder.status = status
+  matchingOrder.dishes = dishes
+  res.json({ data: matchingOrder })
+}
+
+
 // handler for reading the orders
 function read(req, res) {
   const orderId = req.params.orderId
-  const foundOrder = orders.find((order) => order.id === orderId)
-  res.json({ data: foundOrder })
+  const matchingOrder = orders.find((order) => order.id === orderId)
+  res.json({ data: matchingOrder })
 }
 
 
@@ -186,25 +197,12 @@ function create(req, res) {
 }
 
 
-// handler for updating an order
-function update(req, res) {
-  const orderId = req.params.orderId
-  const foundOrder = orders.find((order) => order.id === orderId)
-  const { data: { deliverTo, mobileNumber, status, dishes } = {} } = req.body
-  foundOrder.deliverTo = deliverTo
-  foundOrder.mobileNumber = mobileNumber
-  foundOrder.status = status
-  foundOrder.dishes = dishes
-  res.json({ data: foundOrder })
-}
-
-
 // handler for deleting an order
 function destroy(req, res, next) {
   const { orderId } = req.params
-  const foundOrder = orders.find((order) => order.id === orderId)
+  const matchingOrder = orders.find((order) => order.id === orderId)
   const { data: { id, deliverTo, mobileNumber, status, dishes } = {} } = req.body
-  if (foundOrder.status === "pending") {
+  if (matchingOrder.status === "pending") {
     const index = orders.findIndex((order) => order.id === Number(orderId))
     orders.splice(index, 1)
     res.sendStatus(204)
@@ -215,10 +213,11 @@ function destroy(req, res, next) {
     })
 }
 
+
 module.exports = {
   list,
   read: [orderExists, read],
-  create: [bodyHasDeliverProperty, bodyHasMobileProperty, bodyHasDishesProperty, dishesIsValidArray, dishesArrayHasValidQuantity, create],
-  update: [orderExists, dataIdMatchesOrderId, bodyHasDeliverProperty, bodyHasMobileProperty, bodyHasDishesProperty, bodyHasStatusProperty, statusHasValidString, dishesIsValidArray, dishesArrayHasValidQuantity, update],
+  create: [bodyHasDeliverProp, bodyHasMobileNumber, bodyHasDishesProp, dishesArrayIsValid, dishesArrayLengthIsValid, create],
+  update: [orderExists, dataIdMatchesOrderId, bodyHasDeliverProp, bodyHasMobileNumber, bodyHasDishesProp, bodyHasStatus, dataStringIsValid, dishesArrayIsValid, dishesArrayLengthIsValid, update],
   delete: [orderExists, destroy],
 }

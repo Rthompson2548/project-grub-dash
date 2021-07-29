@@ -1,10 +1,6 @@
-// COMPLETE!!
-
 const router = require("express").Router()
 const controller = require("./dishes.controller")
 const methodNotAllowed = require("../errors/methodNotAllowed")
-
-// TODO: Implement the /dishes routes needed to make the tests pass
 
 router
     // routes to home page
@@ -26,5 +22,6 @@ router
     .put(controller.update)
     // for request types that aren't available to use on the dish
     .all(methodNotAllowed)
+    
 
 module.exports = router
