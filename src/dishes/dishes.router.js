@@ -1,6 +1,6 @@
-const router = require("express").Router()
-const controller = require("./dishes.controller")
-const methodNotAllowed = require("../errors/methodNotAllowed")
+const router = require("express").Router();
+const controller = require("./dishes.controller");
+const methodNotAllowed = require("../errors/methodNotAllowed");
 
 router
     // routes to home page
@@ -10,7 +10,7 @@ router
     // for making a post request at the route
     .post(controller.create)
     // for request types that aren't available to use on dish
-    .all(methodNotAllowed)
+    .all(methodNotAllowed);
 
 
 router
@@ -21,7 +21,7 @@ router
     // for making a put request at the route
     .put(controller.update)
     // for request types that aren't available to use on the dish
-    .all(methodNotAllowed)
+    .all(methodNotAllowed);
     
 
 module.exports = router
