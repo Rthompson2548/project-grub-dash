@@ -65,7 +65,10 @@ function dataStringIsValid(req, res, next) {
     status.includes("preparing") ||
     status.includes("out-for-delivery") ||
     status.includes("delivered")
+
   ) {
+    res.locals.status = status
+    // console.log("res locals =>",res.locals, "<=")
     return next()
   }
   // otherwise, return the following message
@@ -81,6 +84,7 @@ function bodyHasDishesProp(req, res, next) {
   // if the order contain 1 or more dishes, move onto the next function
   if (dishes) {
     res.locals.dishes = dishes
+    // console.log("res locals =>",res.locals, "<=")
     return next()
   }
   // otherwise, return the following message
@@ -94,7 +98,7 @@ function bodyHasDishesProp(req, res, next) {
 function dishesArrayIsValid(req, res, next) {
   const { data: { dishes } = {} } = req.body
   // if there are no dishes, return the following message
-  if (!Array.isArray(dishes) || dishes.length == 0) {
+  if (!Array.isArray(res.locals.dishes) || res.locals.dishes.length == 0) {
     next({
       status: 400,
       message: `invalid dishes property: dishes property must be non-empty array`,
@@ -145,6 +149,7 @@ function orderExists(req, res, next) {
   const matchingOrder = orders.find((order) => order.id === orderId)
   // if it exists, move onto the next function
   if (matchingOrder) {
+    res.locals.order = matchingOrder
     return next()
   }
   // otherwise, return the following message

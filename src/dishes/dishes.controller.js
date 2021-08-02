@@ -54,7 +54,8 @@ function bodyHasPrice(req, res, next) {
   } = ({} = req.body)
   // if a price is provided, move to next function
   if (price) {
-    // res.locals.price = price
+    res.locals.price = price
+    // console.log("res locals =>",res.locals, "<=")
     return next()
   }
   // otherwise, return the following message
@@ -106,7 +107,7 @@ function bodyHasValidPriceForUpdate(req, res, next) {
   // if the price data type is not a number, or if
   // the price is less than or equal to $0, return the
   // following message
-  if (typeof price !== "number" || price <= 0) {
+  if (typeof res.locals.price !== "number" || res.locals.price <= 0) {
     next({
       status: 400,
       message: `type of price must be number`,
@@ -166,7 +167,7 @@ function read(req, res) {
   // create variable for finding the dish with the correct id
   const matchingDish = dishes.find((dish) => dish.id === dishId)
   // return that dish's data
-  res.json({ data: matchingDish })
+  res.json({ data: res.locals.matchingDish })
 }
 
 // handler for creating a new dish
