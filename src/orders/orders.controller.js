@@ -6,7 +6,6 @@ const orders = require(path.resolve("src/data/orders-data"))
 // Use this function to assigh ID's when necessary
 const nextId = require("../utils/nextId")
 
-// MIDDLEWARE
 
 // middleware for checking if there is a delivery location for order
 function bodyHasDeliverProp(req, res, next) {
